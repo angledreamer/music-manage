@@ -5,6 +5,8 @@ import { get, post } from './http'
 // =======================> 用户 API
 // 登录
 export const loginIn = (params) => post(`/demo/login/login.do`, params)
+//查询用户信息
+export const userInfo = (params) => post(`/demo/login/getUserInfo.do`, params)
 // 注册
 export const SignUp = (params) => post(`user/add`, params)
 // 更新用户信息

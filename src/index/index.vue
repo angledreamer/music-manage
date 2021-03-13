@@ -30,22 +30,46 @@
     <main>
       <div class="main-right">
         <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-          <div style="position: relative; height: 60px; width: 100%"></div>
           <el-tab-pane label="用户管理" name="first">
-            <el-tabs :tab-position="tabPosition" style="min-height: 800px;">
-              <el-tab-pane label="用户管理">
-                用户管理
-              </el-tab-pane>
-              <el-tab-pane label="配置管理">
-                配置管理
-              </el-tab-pane>
-              <el-tab-pane label="角色管理">
-                角色管理
-              </el-tab-pane>
-              <el-tab-pane label="定时任务补偿">
-                定时任务补偿
-              </el-tab-pane>
-            </el-tabs>
+            <el-collapse v-model="activeNames">
+              <el-collapse-item name="1">
+                <template slot="title">
+                  <i style="color: blue; margin-left: 2%; font-size: 1.2em; font-style:normal; font-weight: bold;">用户信息管理</i>
+                </template>
+                <el-tabs class="user-table" type="border-card" :tab-position="tabPosition">
+                  <el-table :data="userTableData" height="250" border>
+                    <el-table-column prop="userName" label="姓名" width="120">
+                    </el-table-column>
+                    <el-table-column prop="mobilePhone" label="手机号码" width="140">
+                    </el-table-column>
+                    <el-table-column prop="sex" label="性别" width="140">
+                    </el-table-column>
+                    <el-table-column prop="age" label="年龄" width="140">
+                    </el-table-column>
+                    <el-table-column prop="birthDay" label="生日" width="140">
+                    </el-table-column>
+                    <el-table-column prop="address" label="地址">
+                    </el-table-column>
+                    <el-table-column label="操作">
+                      <template slot-scope="scope">
+                        <el-button size="small" type="primary" icon="el-icon-edit" @click="handleEdit(scope.$index, scope.row)"></el-button>
+                        <el-button size="small" type="danger" icon="el-icon-delete"  @click="handleDelete(scope.$index, scope.row)"></el-button>
+                        <el-button size="small" type="info" icon="el-icon-user"  @click="handleDetail(scope.$index, scope.row)"></el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </el-tabs>
+              </el-collapse-item>
+              <el-collapse-item name="2">
+                <template slot="title">
+                  <i style="color: blue; margin-left: 2%; font-size: 1.2em; font-style:normal; font-weight: bold;">用户详细信息</i>
+                </template>
+                <el-tabs class="user-table" type="border-card" :tab-position="tabPosition">
+                  <el-table :data="userTableData" height="250" border>
+                  </el-table>
+                </el-tabs>
+              </el-collapse-item>
+            </el-collapse>
           </el-tab-pane>
           <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
           <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
@@ -56,18 +80,75 @@
   </div>
 </template>
 <script>
+import { userInfo } from '../api/index'
 export default {
   name: 'app',
   data: function () {
     return {
       active: true,
       tabPosition: 'left',
-      activeName: 'first'
+      activeName: 'first',
+      activeNames: ['1'],
+      userTableData: [],
+      hasClick: false
     }
   },
   methods: {
     handleClick: function (tab, event) {
-      console.log(tab, event)
+      var that = this
+      console.log(tab)
+      var params = {}
+      that.hasClick = true
+      if (tab.name === 'first' && that.hasClick) {
+        userInfo(params)
+          .then(res => {
+            that.hasClick = false
+            if (res.code === '000000') {
+              that.userTableData = res.userInfo
+              that.$message({
+                message: res.message,
+                type: 'success'
+              })
+            } else {
+              that.$message({
+                message: res.message,
+                type: 'warning'
+              })
+            }
+          })
+          .catch(failResponse => {})
+      }
+      if (tab.name === 'second') {
+      }
+      if (tab.name === 'third') {
+      }
+      if (tab.name === 'fourth') {
+      }
+    },
+    handleEdit: function (index, row) {
+      console.log(index, row)
+    },
+    handleDelete: function (index, row) {
+      var that = this
+      console.log(index, row)
+      that.$confirm('此操作将删除该用户信息, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        that.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch(() => {
+        that.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    handleDetail: function (index, row) {
+      console.log(index, row)
     },
     logout: function () {
       var that = this
@@ -77,6 +158,29 @@ export default {
       var that = this
       that.$router.push({path: '/page/resetPwd/resetPwd'})
     }
+  },
+  mounted: function () {
+    var that = this
+    var params = {}
+    that.$nextTick(function () {
+      userInfo(params)
+        .then(res => {
+          that.hasClick = false
+          if (res.code === '000000') {
+            that.userTableData = res.userInfo
+            that.$message({
+              message: res.message,
+              type: 'success'
+            })
+          } else {
+            that.$message({
+              message: res.message,
+              type: 'warning'
+            })
+          }
+        })
+        .catch(failResponse => {})
+    })
   }
 }
 </script>
@@ -112,7 +216,7 @@ main {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  min-height: 800px;
+  min-height: 500px;
   border: solid 40px #e9ecf1;
   background-color: #fcfcfc;
 }
@@ -130,5 +234,8 @@ main .main-right {
 }
 main .el-menu {
   background-color: transparent !important;
+}
+main .user-table {
+  min-width: 80%;
 }
 </style>
