@@ -37,7 +37,11 @@
                   <i style="color: blue; margin-left: 2%; font-size: 1.2em; font-style:normal; font-weight: bold;">用户信息管理</i>
                 </template>
                 <el-tabs class="user-table" type="border-card" :tab-position="tabPosition">
-                  <el-table :data="userTableData" height="250" border>
+                  <el-table :data="userTableData" height="350" border
+                    v-loading="loading"
+                    element-loading-text="拼命加载中"
+                    element-loading-spinner="el-icon-loading"
+                    element-loading-background="rgba(0, 0, 0, 0.8)">
                     <el-table-column prop="userName" label="姓名" width="120">
                     </el-table-column>
                     <el-table-column prop="mobilePhone" label="手机号码" width="140">
@@ -58,15 +62,18 @@
                       </template>
                     </el-table-column>
                   </el-table>
-                </el-tabs>
-              </el-collapse-item>
-              <el-collapse-item name="2">
-                <template slot="title">
-                  <i style="color: blue; margin-left: 2%; font-size: 1.2em; font-style:normal; font-weight: bold;">用户详细信息</i>
-                </template>
-                <el-tabs class="user-table" type="border-card" :tab-position="tabPosition">
-                  <el-table :data="userTableData" height="250" border>
-                  </el-table>
+                  <div class="block" style="float: right; margin-top: 20px;">
+                    <el-pagination
+                      background
+                      @size-change="handleSizeChange"
+                      @current-change="handleCurrentChange"
+                      :current-page="currentPage4"
+                      :page-sizes="[100, 200, 300, 400]"
+                      :page-size="100"
+                      layout="total, sizes, prev, pager, next, jumper"
+                      :total="400">
+                    </el-pagination>
+                  </div>
                 </el-tabs>
               </el-collapse-item>
             </el-collapse>
@@ -90,7 +97,8 @@ export default {
       activeName: 'first',
       activeNames: ['1'],
       userTableData: [],
-      hasClick: false
+      hasClick: false,
+      loading: false
     }
   },
   methods: {
@@ -100,9 +108,11 @@ export default {
       var params = {}
       that.hasClick = true
       if (tab.name === 'first' && that.hasClick) {
+        that.loading = true
         userInfo(params)
           .then(res => {
             that.hasClick = false
+            that.loading = false
             if (res.code === '000000') {
               that.userTableData = res.userInfo
               that.$message({
