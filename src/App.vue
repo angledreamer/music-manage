@@ -1,18 +1,14 @@
 <template>
   <div id="app">
-    <!-- <Login/> -->
-    <Index/>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import Login from './login/Login'
-import Index from './index/index'
 
 export default {
   name: 'App',
   components: {
-    Login, Index
   }
 }
 </script>
@@ -24,6 +20,8 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+body{
+  margin: 0 0;
 }
 </style>
